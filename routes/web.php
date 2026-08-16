@@ -8,6 +8,7 @@ use App\Http\Controllers\TourSearchController;
 // ADMIN
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\TourPackageController;
+use App\Http\Controllers\Admin\DashboardController;
 
 // MODEL
 use App\Models\TourPackage;
@@ -123,16 +124,27 @@ Route::middleware('auth')->group(function () {
     ])->name('profile.destroy');
 
 });
-
-/*
-|--------------------------------------------------------------------------
-| ADMIN - BOOKING
-|--------------------------------------------------------------------------
-*/
-
 Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/dashboard',
+            [DashboardController::class, 'index']
+        )->name('dashboard');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN BOOKING
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
             '/bookings',
