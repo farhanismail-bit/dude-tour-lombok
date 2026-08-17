@@ -33,7 +33,7 @@ class TourPackage extends Model
     ];
 
     /**
-     * Destinasi yang termasuk dalam paket tour.
+     * Destination yang termasuk dalam paket tour.
      */
     public function destinations(): BelongsToMany
     {
@@ -43,8 +43,10 @@ class TourPackage extends Model
             'tour_package_id',
             'destination_id'
         )
-        ->withPivot('sort_order')
-        ->withTimestamps()
-        ->orderBy('tour_package_destinations.sort_order');
+            ->withPivot('sort_order')
+            ->withTimestamps()
+            ->orderBy(
+                'tour_package_destinations.sort_order'
+            );
     }
 }

@@ -26,19 +26,32 @@ class Destination extends Model
         'is_active' => 'boolean',
     ];
 
-   public function tourPackages(): BelongsToMany
-{
-    return $this->belongsToMany(
-        TourPackage::class,
-        'tour_package_destinations',
-        'destination_id',
-        'tour_package_id'
-    )
-    ->withPivot('sort_order')
-    ->withTimestamps();
-}
+    /**
+     * Tour package yang menggunakan destination ini.
+     */
+    public function tourPackages(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            TourPackage::class,
+            'tour_package_destinations',
+            'destination_id',
+            'tour_package_id'
+        )
+            ->withPivot('sort_order')
+            ->withTimestamps()
+            ->orderBy(
+                'tour_package_destinations.sort_order'
+            );
+    }
+
+    /**
+     * Booking yang menggunakan destination ini.
+     */
     public function bookings(): HasMany
-{
-    return $this->hasMany(Booking::class);
-}
+    {
+        return $this->hasMany(
+            Booking::class,
+            'destination_id'
+        );
+    }
 }

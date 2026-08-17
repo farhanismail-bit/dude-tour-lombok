@@ -5,15 +5,17 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\TourSearchController;
 
-// ADMIN
+// ADMIN CONTROLLERS
 use App\Http\Controllers\Admin\BookingController as AdminBookingController;
 use App\Http\Controllers\Admin\TourPackageController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\DestinationController;
 
-// MODEL
+// MODELS
 use App\Models\TourPackage;
 
-// FUNCTION
+// LARAVEL
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -51,14 +53,17 @@ Route::get('/', function () {
     ]);
 });
 
+
 /*
 |--------------------------------------------------------------------------
 | SEARCH
 |--------------------------------------------------------------------------
 */
 
-Route::get('/search', [TourSearchController::class, 'index'])
-    ->name('search');
+Route::get(
+    '/search',
+    [TourSearchController::class, 'index']
+)->name('search');
 
 
 /*
@@ -67,8 +72,10 @@ Route::get('/search', [TourSearchController::class, 'index'])
 |--------------------------------------------------------------------------
 */
 
-Route::get('/tours/{slug}', [TourController::class, 'show'])
-    ->name('tours.show');
+Route::get(
+    '/tours/{slug}',
+    [TourController::class, 'show']
+)->name('tours.show');
 
 
 /*
@@ -77,24 +84,32 @@ Route::get('/tours/{slug}', [TourController::class, 'show'])
 |--------------------------------------------------------------------------
 */
 
-Route::get('/booking/create', [BookingController::class, 'create'])
-    ->name('booking.create');
+Route::get(
+    '/booking/create',
+    [BookingController::class, 'create']
+)->name('booking.create');
 
-Route::post('/booking', [BookingController::class, 'store'])
-    ->name('booking.store');
+Route::post(
+    '/booking',
+    [BookingController::class, 'store']
+)->name('booking.store');
 
-Route::get('/booking/success/{bookingCode}', [BookingController::class, 'success'])
-    ->name('booking.success');
+Route::get(
+    '/booking/success/{bookingCode}',
+    [BookingController::class, 'success']
+)->name('booking.success');
 
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD
+| DASHBOARD USER
 |--------------------------------------------------------------------------
 */
 
 Route::get('/dashboard', function () {
+
     return Inertia::render('Dashboard');
+
 })
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
@@ -108,25 +123,70 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/profile', [
-        ProfileController::class,
-        'edit'
-    ])->name('profile.edit');
+    Route::get(
+        '/profile',
+        [ProfileController::class, 'edit']
+    )->name('profile.edit');
 
-    Route::patch('/profile', [
-        ProfileController::class,
-        'update'
-    ])->name('profile.update');
+    Route::patch(
+        '/profile',
+        [ProfileController::class, 'update']
+    )->name('profile.update');
 
-    Route::delete('/profile', [
-        ProfileController::class,
-        'destroy'
-    ])->name('profile.destroy');
+    Route::delete(
+        '/profile',
+        [ProfileController::class, 'destroy']
+    )->name('profile.destroy');
 
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+|
+| Semua route di dalam group ini otomatis memiliki:
+|
+| URL  : /admin/...
+| NAME : admin....
+|
+*/
+
 Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+    /*
+|--------------------------------------------------------------------------
+| DESTINATIONS ADMIN
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'destinations',
+    DestinationController::class
+)->except([
+    'show',
+]);
+
+Route::get(
+    'destinations/{destination}',
+    [DestinationController::class, 'show']
+)->name(
+    'destinations.show'
+);
+
+Route::patch(
+    'destinations/{destination}/toggle-active',
+    [
+        DestinationController::class,
+        'toggleActive',
+    ]
+)->name(
+    'destinations.toggle-active'
+);
+
 
         /*
         |--------------------------------------------------------------------------
@@ -165,17 +225,30 @@ Route::prefix('admin')
             '/bookings/{booking}/payment-status',
             [AdminBookingController::class, 'updatePaymentStatus']
         )->name('bookings.payment-status');
-    });
-    /*
-/*
-|--------------------------------------------------------------------------
-| ADMIN - TOUR PACKAGES
-|--------------------------------------------------------------------------
-*/
 
-Route::prefix('admin')
-    ->name('admin.')
-    ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN CUSTOMER
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/customers',
+            [CustomerController::class, 'index']
+        )->name('customers.index');
+
+        Route::get(
+            '/customers/{customer}',
+            [CustomerController::class, 'show']
+        )->name('customers.show');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN TOUR PACKAGES
+        |--------------------------------------------------------------------------
+        */
 
         Route::resource(
             'tour-packages',
@@ -183,6 +256,12 @@ Route::prefix('admin')
         )->except([
             'show',
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOGGLE TOUR PACKAGE ACTIVE
+        |--------------------------------------------------------------------------
+        */
 
         Route::patch(
             'tour-packages/{tourPackage}/toggle-active',
@@ -194,6 +273,12 @@ Route::prefix('admin')
             'tour-packages.toggle-active'
         );
 
+        /*
+        |--------------------------------------------------------------------------
+        | TOGGLE TOUR PACKAGE FEATURED
+        |--------------------------------------------------------------------------
+        */
+
         Route::patch(
             'tour-packages/{tourPackage}/toggle-featured',
             [
@@ -204,6 +289,8 @@ Route::prefix('admin')
             'tour-packages.toggle-featured'
         );
     });
+
+
 /*
 |--------------------------------------------------------------------------
 | AUTH
